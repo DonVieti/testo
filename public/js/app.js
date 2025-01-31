@@ -316,13 +316,13 @@ async function editDevice(id) {
 }
 
 // 📌 4️⃣ Gerät löschen (DELETE)
-function deleteDevice(id) {
-    let devices = JSON.parse(localStorage.getItem("devices")) || [];
+async function deleteDevice(id) {
+    let devices = await fetchDevices();
     const device = devices.find(d => d.id === id);
 
     if (confirm("Möchtest du " + device.name + " wirklich löschen?")) {
         devices = devices.filter(d => d.id !== id);
-        deleteDevices(id);
+        await deleteDevices(id);
         // Prüfen, ob wir uns auf `detail.html` befinden
         if (window.location.pathname.includes("detail.html")) {
             alert(device.name + " wurde gelöscht. Zurück zur Startseite.");
