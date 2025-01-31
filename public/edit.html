@@ -17,7 +17,8 @@
         <input type="hidden" id="device-id"> <!-- 🛠️ Für Update notwendig -->
         <input type="text" id="device-name" placeholder="Gerätename" required minlength="3">
         <input type="text" id="device-type" placeholder="Gerätetyp (z. B. Lampe, Steckdose)" required minlength="3" pattern="[A-Za-zÄÖÜäöüß\s]+" title="Nur Buchstaben und Leerzeichen erlaubt.">
-        <input type="text" id="device-power" placeholder="Leistung in Watt" required minlength="1">
+        <input type="number" id="device-power" placeholder="Leistung in Watt"
+               required minlength="1">
         <input type="text" id="device-room" placeholder="Raum" required minlength="3" pattern="[A-Za-zÄÖÜäöüß\s]+" title="Nur Buchstaben und Leerzeichen erlaubt.">
         <select id="device-category" required>
             <option value="">Kategorie wählen...</option>

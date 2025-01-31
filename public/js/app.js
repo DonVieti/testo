@@ -447,22 +447,6 @@ function loadEditForm() {
     document.getElementById("edit-btn").textContent = "bearbeiten";
 }
 
-// INDEX TEST
-function showFirstDevice() {
-    const devices = JSON.parse(localStorage.getItem("devices")) || [];
-    const displayElement = document.getElementById("device-name-display");
-
-    if (!displayElement) {
-        console.warn("Kein Platzhalter für den Gerätenamen gefunden.");
-        return;
-    }
-
-    if (devices.length > 0) {
-        displayElement.textContent = `Erstes Gerät: ${devices[0].name}`;
-    } else {
-        displayElement.textContent = "Keine Geräte gespeichert.";
-    }
-}
 
 // detail
 function loadDeviceDetails() {
