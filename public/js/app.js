@@ -317,7 +317,7 @@ async function editDevice(id) {
 
 // 📌 4️⃣ Gerät löschen (DELETE)
 async function deleteDevice(id) {
-    let devices = await fetchDevices();
+    const devices = await fetchDevices();
     const device = devices.find(d => d.id === id);
 
     if (confirm("Möchtest du " + device.name + " wirklich löschen?")) {
