@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("devices", JSON.stringify(defaultDevices));
     }
     initializeHeaderAndFooter();
+    loadDevicesOnIndex();
 
     if (window.location.pathname.includes("index.html")) {
         loadDevicesOnIndex();
