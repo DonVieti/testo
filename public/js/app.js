@@ -38,10 +38,12 @@ const defaultDevices = [
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
-    if (!localStorage.getItem("devices") || JSON.parse(localStorage.getItem("devices")).length === 0) {
+    /*if (!localStorage.getItem("devices") ||
+     JSON.parse(localStorage.getItem("devices")).length === 0) {
+
         localStorage.clear();
         localStorage.setItem("devices", JSON.stringify(defaultDevices));
-    }
+    }*/
     initializeHeaderAndFooter();
     loadDevicesOnIndex();
 
@@ -201,11 +203,11 @@ function clearSearchInputs() {
 }
 
 // 📌 2️⃣ Geräte anzeigen (READ) - Jetzt global definiert!
-function loadDevices() {
+async function loadDevices() {
     const deviceList = document.getElementById("device-list");
     if (!deviceList) return; // Falls device-list nicht existiert, abbrechen
 
-    const devices = JSON.parse(localStorage.getItem("devices")) || [];
+    const devices = await fetchDevices();
     deviceList.innerHTML = ""; // Liste zurücksetzen
 
     devices.forEach(device => {
@@ -234,7 +236,7 @@ function setupCRUD() {
     loadDevices(); // 🟢 Vorhandene Geräte aus LocalStorage laden
 
     // 📌 1️⃣ Gerät hinzufügen oder bearbeiten (CREATE/UPDATE)
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
         event.preventDefault(); // Verhindert das Neuladen
 
         const id = document.getElementById("device-id").value;
@@ -253,37 +255,17 @@ function setupCRUD() {
 // Falls kein Pfad angegeben ist, ergänze `images/`
         const image = imageName && !imageName.includes("/") ? `images/${imageName}` : imageName || "images/default.png";
 
-        let devices = JSON.parse(localStorage.getItem("devices")) || [];
+
 
         if (id) {
             // 🔄 UPDATE-Modus
-            const index = devices.findIndex(d => d.id === parseInt(id));
-            if (index !== -1) {
-                devices[index] = {
-                    id: parseInt(id),
-                    name,
-                    type,
-                    power,
-                    room,
-                    category,
-                    image
-                };
-            }
+            updateDevice(id, name, type, power, room, category, image);
         } else {
             // ➕ NEUES Gerät hinzufügen
-            const newDevice = {
-                id: Date.now(),
-                name,
-                type,
-                power,
-                room,
-                category,
-                image
-            };
-            devices.push(newDevice);
+            addDevice(name, type, power, room, category, image);
         }
 
-        localStorage.setItem("devices", JSON.stringify(devices)); // 🟢 Speichern
+
         form.reset(); // Formular leeren
         document.getElementById("device-id").value = ""; // ID-Feld zurücksetzen
         document.getElementById("form-title").textContent = "Gerät hinzufügen"; // Titel zurücksetzen
@@ -293,9 +275,9 @@ function setupCRUD() {
 }
 
 // 📌 3️⃣ Gerät bearbeiten (UPDATE-Vorbereitung)
-function editDevice(id) {
-    const devices = JSON.parse(localStorage.getItem("devices")) || [];
-    const device = devices.find(d => d.id === id);
+async function editDevice(id) {
+
+    const device = await getDeviceById(id);
 
     if (!device) {
         alert("Gerät nicht gefunden.");
@@ -340,7 +322,7 @@ function deleteDevice(id) {
 
     if (confirm("Möchtest du " + device.name + " wirklich löschen?")) {
         devices = devices.filter(d => d.id !== id);
-        localStorage.setItem("devices", JSON.stringify(devices));
+        deleteDevices(id);
         // Prüfen, ob wir uns auf `detail.html` befinden
         if (window.location.pathname.includes("detail.html")) {
             alert(device.name + " wurde gelöscht. Zurück zur Startseite.");
@@ -351,7 +333,7 @@ function deleteDevice(id) {
     }
 }
 
-function loadSearchResults() {
+async function loadSearchResults() {
     const urlParams = new URLSearchParams(window.location.search);
     const searchQuery = urlParams.get("q") || ""; // Falls leer, bleibt die Suche leer
     const powerMin = urlParams.get("powermin") ? parseInt(urlParams.get("powermin"), 10) : 0;
@@ -375,7 +357,7 @@ function loadSearchResults() {
 
     document.querySelector("h3").textContent = searchText;
 
-    const devices = JSON.parse(localStorage.getItem("devices")) || [];
+    const devices = await fetchDevices();
     const resultsTable = document.getElementById("search-results");
 
     resultsTable.innerHTML = ""; // Vorherige Inhalte löschen
@@ -416,7 +398,7 @@ function loadSearchResults() {
     });
 }
 
-function loadEditForm() {
+async function loadEditForm() {
     const urlParams = new URLSearchParams(window.location.search);
     const deviceId = urlParams.get("id"); // 🔹 ID aus der URL holen
 
@@ -425,7 +407,7 @@ function loadEditForm() {
         return;
     }
 
-    const devices = JSON.parse(localStorage.getItem("devices")) || [];
+    const devices = await fetchDevices();
     const device = devices.find(d => d.id === parseInt(deviceId));
 
     if (!device) {
@@ -449,7 +431,7 @@ function loadEditForm() {
 
 
 // detail
-function loadDeviceDetails() {
+async function loadDeviceDetails() {
     const urlParams = new URLSearchParams(window.location.search);
     const deviceId = urlParams.get("id");
 
@@ -458,8 +440,7 @@ function loadDeviceDetails() {
         return;
     }
 
-    const devices = JSON.parse(localStorage.getItem("devices")) || [];
-    const device = devices.find(d => d.id == deviceId); // `==`, da URL-Parameter ein String ist
+    const device = await getDeviceById(deviceId);
 
     if (!device) {
         document.getElementById("device_title").textContent = "Gerät nicht gefunden.";
@@ -480,8 +461,8 @@ function loadDeviceDetails() {
     document.getElementById("delete-button").setAttribute("onclick", `deleteDevice(${device.id})`);
 }
 
-function loadDevicesOnIndex() {
-    const devices = JSON.parse(localStorage.getItem("devices")) || [];
+async function loadDevicesOnIndex() {
+    const devices = await fetchDevices();
     const container = document.getElementById("device-container");
 
     if (!container) {
@@ -523,4 +504,71 @@ function showConfirmationMessage() {
         <p>Wir werden uns so schnell wie möglich bei Ihnen melden.</p>
         <a href="index.html" class="contact-btn-back" >Zur Startseite</a>
     `;
+}
+
+
+async function fetchDevices() {
+    try {
+        const response = await fetch('/api/devices');
+        if (!response.ok) throw new Error("Server antwortete nicht korrekt");
+
+        const devices = await response.json();
+        return devices;
+    } catch (error) {
+        console.error("Fehler beim Abrufen der Geräte:", error);
+        return []; // Falls die API fehlschlägt, gebe ein leeres Array zurück
+    }
+}
+async function addDevice(name, type, power, room, category, image) {
+    try {
+        await fetch('/api/devices', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, type, power, room, category, image }),
+        });
+        loadDevices(); // Liste neu laden
+    } catch (error) {
+        console.error("Fehler beim Hinzufügen eines Geräts:", error);
+    }
+}
+async function updateDevice(id, name, type, power, room, category, image) {
+    try {
+        const existingDevice = await getDeviceById(id);
+        if (!existingDevice) {
+            console.error(`Gerät mit ID ${id} nicht gefunden.`);
+            return;
+        }
+
+        await fetch('/api/devices', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, name, type, power, room, category, image }),
+        });
+
+        loadDevices(); // Liste neu laden
+    } catch (error) {
+        console.error("Fehler beim Aktualisieren des Geräts:", error);
+    }
+}
+async function deleteDevices(id) {
+    try {
+        await fetch('/api/devices', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id }),
+        });
+        loadDevices(); // Aktualisierte Liste neu laden
+    } catch (error) {
+        console.error("Fehler beim Löschen des Geräts:", error);
+    }
+}
+async function getDeviceById(id) {
+    try {
+        const response = await fetch(`/api/devices/${id}`);
+        if (!response.ok) throw new Error("Gerät nicht gefunden");
+        return await response.json();
+    } catch (error) {
+        console.error(`Fehler beim Abrufen des Geräts mit ID ${id}:`, error);
+        return null;
+    }
 }
