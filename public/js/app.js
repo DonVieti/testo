@@ -1,17 +1,24 @@
-
 document.addEventListener("DOMContentLoaded", () => {
-    initializeHeaderAndFooter();
-    loadDevicesOnIndex();
-
-    if (window.location.pathname.includes("index.html")) {
+    const path = window.location.pathname;
+    // Bedingung: Entweder index.html ist explizit in der URL ODER keine der anderen Seiten ist enthalten
+    if (
+        path.includes("index.html") ||
+        !(
+            path.includes("detail.html") ||
+            path.includes("kontakt.html") ||
+            path.includes("edit.html") ||
+            path.includes("search.html") ||
+            path.includes("impressum.html")
+        )
+    ) {
         loadDevicesOnIndex();
     }
 
-    if (window.location.pathname.includes("detail.html")) {
+    if (path.includes("detail.html")) {
         loadDeviceDetails();
     }
 
-    if (window.location.pathname.includes("kontakt.html")) {
+    if (path.includes("kontakt.html")) {
         try {
             initializeMap();
         } catch (error) {
@@ -19,12 +26,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    if (window.location.pathname.includes("edit.html")) {
+    if (path.includes("edit.html")) {
         setupCRUD();
         loadDevices(); // 🔹 Geräte direkt nach Laden anzeigen
     }
 
-    if (window.location.pathname.includes("search.html")) {
+    if (path.includes("search.html")) {
         loadSearchResults();
     }
 
@@ -202,15 +209,13 @@ function setupCRUD() {
         const category = document.getElementById("device-category").value;
         let imageName = document.getElementById("device-image").value.trim();
 
-// Falls der Benutzer keine Dateiendung (.png, .jpg, .jpeg) angibt, füge .png hinzu
+        // Falls der Benutzer keine Dateiendung (.png, .jpg, .jpeg) angibt, füge .png hinzu
         if (imageName && !imageName.includes(".")) {
             imageName += ".png";
         }
 
-// Falls kein Pfad angegeben ist, ergänze `images/`
+        // Falls kein Pfad angegeben ist, ergänze `images/`
         const image = imageName && !imageName.includes("/") ? `images/${imageName}` : imageName || "images/default.png";
-
-
 
         if (id) {
             // 🔄 UPDATE-Modus
@@ -219,7 +224,6 @@ function setupCRUD() {
             // ➕ NEUES Gerät hinzufügen
             addDevice(name, type, power, room, category, image);
         }
-
 
         form.reset(); // Formular leeren
         document.getElementById("device-id").value = ""; // ID-Feld zurücksetzen
@@ -389,8 +393,6 @@ async function loadDeviceDetails() {
     const urlParams = new URLSearchParams(window.location.search);
     const deviceId = urlParams.get("id");
 
-    console.log("Extracted ID from URL:", deviceId); // Debug-Ausgabe
-
     if (!deviceId) {
         document.getElementById("device_title").textContent = "Kein Gerät ausgewählt.";
         return;
@@ -475,18 +477,20 @@ async function fetchDevices() {
         return []; // Falls die API fehlschlägt, gebe ein leeres Array zurück
     }
 }
+
 async function addDevice(name, type, power, room, category, image) {
     try {
         await fetch('/api/devices', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, type, power, room, category, image }),
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name, type, power, room, category, image}),
         });
         loadDevices(); // Liste neu laden
     } catch (error) {
         console.error("Fehler beim Hinzufügen eines Geräts:", error);
     }
 }
+
 async function updateDevice(id, name, type, power, room, category, image) {
     try {
         const existingDevice = await getDeviceById(id);
@@ -497,8 +501,16 @@ async function updateDevice(id, name, type, power, room, category, image) {
 
         await fetch('/api/devices', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, name, type, power, room, category, image }),
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                id,
+                name,
+                type,
+                power,
+                room,
+                category,
+                image
+            }),
         });
 
         loadDevices(); // Liste neu laden
@@ -506,18 +518,20 @@ async function updateDevice(id, name, type, power, room, category, image) {
         console.error("Fehler beim Aktualisieren des Geräts:", error);
     }
 }
+
 async function deleteDevices(id) {
     try {
         await fetch('/api/devices', {
             method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id }),
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id}),
         });
         loadDevices(); // Aktualisierte Liste neu laden
     } catch (error) {
         console.error("Fehler beim Löschen des Geräts:", error);
     }
 }
+
 async function getDeviceById(id) {
     try {
         const response = await fetch(`/api/devices/${id}`);
