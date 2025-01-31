@@ -1,5 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
+    initializeHeaderAndFooter();
+
     const path = window.location.pathname;
+
     // Bedingung: Entweder index.html ist explizit in der URL ODER keine der anderen Seiten ist enthalten
     if (
         path.includes("index.html") ||
@@ -38,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
     const deviceId = urlParams.get("id"); // Gibt `null` zurück, falls kein `id`-Parameter existiert
 
-    if (window.location.pathname.includes("edit.html") && deviceId !== null) {
+    if (path.includes("edit.html") && deviceId !== null) {
         loadEditForm();
     }
 
