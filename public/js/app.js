@@ -276,7 +276,6 @@ async function deleteDevice(id) {
     const device = devices.find(d => d.id === id);
 
     if (confirm("Möchtest du " + device.name + " wirklich löschen?")) {
-        devices = devices.filter(d => d.id !== id);
         await deleteDevices(id);
         // Prüfen, ob wir uns auf `detail.html` befinden
         if (window.location.pathname.includes("detail.html")) {
