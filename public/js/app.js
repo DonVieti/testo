@@ -1,55 +1,10 @@
-const defaultDevices = [
-    {
-        id: 1,
-        name: "Smart Speaker",
-        type: "Lautsprecher",
-        power: 5,
-        room: "Wohnzimmer",
-        category: "Multimedia",
-        image: "images/smartspeak1.png"
-    },
-    {
-        id: 2,
-        name: "Smarte Steckdose",
-        type: "Steckdose",
-        power: 10,
-        room: "Flur",
-        category: "Steuerung",
-        image: "images/steckdose.png"
-    },
-    {
-        id: 3,
-        name: "LED-Streifen",
-        type: "Beleuchtung",
-        power: 8,
-        room: "Schlafzimmer",
-        category: "Beleuchtung",
-        image: "images/ledstreifen.png"
-    },
-    {
-        id: 4,
-        name: "Steuerzentrale",
-        type: "Bedienfeld",
-        power: 8,
-        room: "Flur",
-        category: "Steuerung",
-        image: "images/steuerzentrale.png"
-    }
-];
 
 document.addEventListener("DOMContentLoaded", () => {
-    /*if (!localStorage.getItem("devices") ||
-     JSON.parse(localStorage.getItem("devices")).length === 0) {
-
-        localStorage.clear();
-        localStorage.setItem("devices", JSON.stringify(defaultDevices));
-    }*/
     initializeHeaderAndFooter();
     loadDevicesOnIndex();
 
     if (window.location.pathname.includes("index.html")) {
         loadDevicesOnIndex();
-        showFirstDevice();
     }
 
     if (window.location.pathname.includes("detail.html")) {
