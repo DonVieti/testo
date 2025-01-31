@@ -38,7 +38,7 @@ const defaultDevices = [
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
-    if (!localStorage.getItem("devices")) {
+    if (!localStorage.getItem("devices") || JSON.parse(localStorage.getItem("devices")).length === 0) {
         localStorage.clear();
         localStorage.setItem("devices", JSON.stringify(defaultDevices));
     }
