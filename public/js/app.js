@@ -435,6 +435,8 @@ async function loadDeviceDetails() {
     const urlParams = new URLSearchParams(window.location.search);
     const deviceId = urlParams.get("id");
 
+    console.log("Extracted ID from URL:", deviceId); // Debug-Ausgabe
+
     if (!deviceId) {
         document.getElementById("device_title").textContent = "Kein Gerät ausgewählt.";
         return;
